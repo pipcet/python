@@ -3316,6 +3316,9 @@ then
 	*-*-vxworks*)
 	    ac_sys_system=VxWorks
 	    ;;
+	wasm32-unknown-none)
+	    ac_sys_system=Linux
+	    ;;
 	*)
 		# for now, limit cross builds to known configurations
 		MACHDEP="unknown"
@@ -3366,6 +3369,9 @@ if test "$cross_compiling" = yes; then
 	*-*-vxworks*)
 		_host_cpu=$host_cpu
 		;;
+	wasm32-unknown-none)
+	    _host_cpu=
+	    ;;
 	*)
 		# for now, limit cross builds to known configurations
 		MACHDEP="unknown"
@@ -16662,36 +16668,7 @@ CPPFLAGS=$ac_save_cppflags
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for device files" >&5
 $as_echo "$as_me: checking for device files" >&6;}
 
-if test "x$cross_compiling" = xyes; then
-  if test "${ac_cv_file__dev_ptmx+set}" != set; then
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for /dev/ptmx" >&5
-$as_echo_n "checking for /dev/ptmx... " >&6; }
-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: not set" >&5
-$as_echo "not set" >&6; }
-    as_fn_error $? "set ac_cv_file__dev_ptmx to yes/no in your CONFIG_SITE file when cross compiling" "$LINENO" 5
-  fi
-  if test "${ac_cv_file__dev_ptc+set}" != set; then
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for /dev/ptc" >&5
-$as_echo_n "checking for /dev/ptc... " >&6; }
-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: not set" >&5
-$as_echo "not set" >&6; }
-    as_fn_error $? "set ac_cv_file__dev_ptc to yes/no in your CONFIG_SITE file when cross compiling" "$LINENO" 5
-  fi
-fi
-
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for /dev/ptmx" >&5
-$as_echo_n "checking for /dev/ptmx... " >&6; }
-if ${ac_cv_file__dev_ptmx+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  test "$cross_compiling" = yes &&
-  as_fn_error $? "cannot check for file existence when cross compiling" "$LINENO" 5
-if test -r "/dev/ptmx"; then
-  ac_cv_file__dev_ptmx=yes
-else
-  ac_cv_file__dev_ptmx=no
-fi
-fi
+ac_cv_file__dev_ptmx=no
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_file__dev_ptmx" >&5
 $as_echo "$ac_cv_file__dev_ptmx" >&6; }
 if test "x$ac_cv_file__dev_ptmx" = xyes; then :
@@ -16703,19 +16680,7 @@ if test "x$ac_cv_file__dev_ptmx" = xyes; then
 $as_echo "#define HAVE_DEV_PTMX 1" >>confdefs.h
 
 fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for /dev/ptc" >&5
-$as_echo_n "checking for /dev/ptc... " >&6; }
-if ${ac_cv_file__dev_ptc+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  test "$cross_compiling" = yes &&
-  as_fn_error $? "cannot check for file existence when cross compiling" "$LINENO" 5
-if test -r "/dev/ptc"; then
-  ac_cv_file__dev_ptc=yes
-else
   ac_cv_file__dev_ptc=no
-fi
-fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_file__dev_ptc" >&5
 $as_echo "$ac_cv_file__dev_ptc" >&6; }
 if test "x$ac_cv_file__dev_ptc" = xyes; then :
