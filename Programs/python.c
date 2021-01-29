@@ -9,6 +9,7 @@ wmain(int argc, wchar_t **argv)
     return Py_Main(argc, argv);
 }
 #else
+int main(int, char **) __attribute__((visibility("default")));
 int
 main(int argc, char **argv)
 {
