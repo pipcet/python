@@ -580,8 +580,8 @@ _Py_HashRandomization_Init(const PyConfig *config)
     }
     _Py_HashSecret_Initialized = 1;
 
-    if (config->use_hash_seed) {
-        if (config->hash_seed == 0) {
+    if (1 || config->use_hash_seed) {
+        if (1 || config->hash_seed == 0) {
             /* disable the randomized hash */
             memset(secret, 0, secret_size);
         }
