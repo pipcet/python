@@ -3421,12 +3421,7 @@ os_chflags_impl(PyObject *module, path_t *path, unsigned long flags,
     }
 
     Py_BEGIN_ALLOW_THREADS
-#ifdef HAVE_LCHFLAGS
-    if (!follow_symlinks)
-        result = lchflags(path->narrow, flags);
-    else
-#endif
-        result = chflags(path->narrow, flags);
+      result = 0;
     Py_END_ALLOW_THREADS
 
     if (result)
@@ -12635,6 +12630,10 @@ os_getxattr_impl(PyObject *module, path_t *path, path_t *attribute,
     for (i = 0; ; i++) {
         void *ptr;
         ssize_t result;
+#ifndef XATTR_SIZE_MAX
+#define XATTR_SIZE_MAX 128
+#define XATTR_LIST_MAX 128
+#endif
         static const Py_ssize_t buffer_sizes[] = {128, XATTR_SIZE_MAX, 0};
         Py_ssize_t buffer_size = buffer_sizes[i];
         if (!buffer_size) {
