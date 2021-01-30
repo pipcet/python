@@ -452,8 +452,10 @@ search_for_prefix(PyCalculatePath *calculate, _PyPathConfig *pathconfig,
 {
     PyStatus status;
 
+    pathconfig->home = wcsdup(L"/home/pip/g/wasm/wasm32-unknown-none/wasm32-unknown-none/");
     /* If PYTHONHOME is set, we believe it unconditionally */
     if (pathconfig->home) {
+	printf("home set\n");
         /* Path: <home> / <lib_python> */
         if (safe_wcscpy(prefix, pathconfig->home, prefix_len) < 0) {
             return PATHLEN_ERR();
@@ -702,6 +704,7 @@ search_for_exec_prefix(PyCalculatePath *calculate, _PyPathConfig *pathconfig,
 {
     PyStatus status;
 
+    pathconfig->home = wcsdup(L"/home/pip/g/wasm/wasm32-unknown-none/wasm32-unknown-none/");
     /* If PYTHONHOME is set, we believe it unconditionally */
     if (pathconfig->home) {
         /* Path: <home> / <lib_python> / "lib-dynload" */
@@ -1261,6 +1264,15 @@ calculate_read_pyenv(PyCalculatePath *calculate)
     PyStatus status;
     FILE *env_file = NULL;
 
+    /* Look for a 'home' variable and set argv0_path to it, if found */
+    wchar_t *home = NULL;
+    home = wcsdup(L"/home/pip/g/wasm/wasm32-unknown-none/wasm32-unknown-none/");
+    if (home) {
+        PyMem_RawFree(calculate->argv0_path);
+        calculate->argv0_path = home;
+    }
+    return _PyStatus_OK();
+
     status = calculate_open_pyenv(calculate, &env_file);
     if (_PyStatus_EXCEPTION(status)) {
         return status;
@@ -1271,13 +1283,7 @@ calculate_read_pyenv(PyCalculatePath *calculate)
     }
 
     /* Look for a 'home' variable and set argv0_path to it, if found */
-    wchar_t *home = NULL;
-    status = _Py_FindEnvConfigValue(env_file, L"home", &home);
-    if (_PyStatus_EXCEPTION(status)) {
-        fclose(env_file);
-        return status;
-    }
-
+    home = wcsdup(L"/home/pip/g/wasm/wasm32-unknown-none/wasm32-unknown-none/");
     if (home) {
         PyMem_RawFree(calculate->argv0_path);
         calculate->argv0_path = home;

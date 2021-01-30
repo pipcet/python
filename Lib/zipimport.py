@@ -71,24 +71,7 @@ class zipimporter(_bootstrap_external._LoaderBasics):
             path = path.replace(alt_path_sep, path_sep)
 
         prefix = []
-        while True:
-            try:
-                st = _bootstrap_external._path_stat(path)
-            except (OSError, ValueError):
-                # On Windows a ValueError is raised for too long paths.
-                # Back up one path element.
-                dirname, basename = _bootstrap_external._path_split(path)
-                if dirname == path:
-                    raise ZipImportError('not a Zip file', path=path)
-                path = dirname
-                prefix.append(basename)
-            else:
-                # it exists
-                if (st.st_mode & 0o170000) != 0o100000:  # stat.S_ISREG
-                    # it's a not file
-                    raise ZipImportError('not a Zip file', path=path)
-                break
-
+        raise ZipImportError('not a Zip file', path=path)
         try:
             files = _zip_directory_cache[path]
         except KeyError:

@@ -29,7 +29,7 @@ class ZipReader(abc.TraversableResources):
         try:
             return super().open_resource(resource)
         except KeyError as exc:
-            raise FileNotFoundError(exc.args[0])
+            raise OSError(exc.args[0])
 
     def is_resource(self, path):
         # workaround for `zipfile.Path.is_file` returning true

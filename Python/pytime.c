@@ -1111,11 +1111,6 @@ _PyTime_localtime(time_t t, struct tm *tm)
 
     errno = 0;
     if (localtime_r(&t, tm) == NULL) {
-        if (errno == 0) {
-            errno = EINVAL;
-        }
-        PyErr_SetFromErrno(PyExc_OSError);
-        return -1;
     }
     return 0;
 #endif /* MS_WINDOWS */

@@ -377,6 +377,7 @@ _Py_COMP_DIAG_POP
         }
 
         errno = 0;
+	printf ("opener %p name %s\n", opener, name);
         if (opener == Py_None) {
             do {
                 Py_BEGIN_ALLOW_THREADS
@@ -385,12 +386,16 @@ _Py_COMP_DIAG_POP
 #else
                 self->fd = open(name, flags, 0666);
 #endif
+		printf("opened, fd %d\n", self->fd);
                 Py_END_ALLOW_THREADS
             } while (self->fd < 0 && errno == EINTR &&
                      !(async_err = PyErr_CheckSignals()));
 
-            if (async_err)
+	    printf("opened2, fd %d\n", self->fd);
+            if (async_err) {
+	      printf("async_err\n");
                 goto error;
+	    }
         }
         else {
             PyObject *fdobj;
@@ -429,9 +434,13 @@ _Py_COMP_DIAG_POP
             goto error;
         }
 
+#if 0
 #ifndef MS_WINDOWS
-        if (_Py_set_inheritable(self->fd, 0, atomic_flag_works) < 0)
+        if (_Py_set_inheritable(self->fd, 0, atomic_flag_works) < 0) {
+	  printf("whatever this is\n");
             goto error;
+	}
+#endif
 #endif
     }
 
@@ -439,6 +448,7 @@ _Py_COMP_DIAG_POP
     Py_BEGIN_ALLOW_THREADS
     fstat_result = _Py_fstat_noraise(self->fd, &fdfstat);
     Py_END_ALLOW_THREADS
+      printf("fstat_result %d\n", fstat_result);
     if (fstat_result < 0) {
         /* Tolerate fstat() errors other than EBADF.  See Issue #25717, where
         an anonymous file on a Virtual Box shared folder filesystem would
@@ -491,6 +501,7 @@ _Py_COMP_DIAG_POP
     goto done;
 
  error:
+    printf("error!");
     ret = -1;
     if (!fd_is_own)
         self->fd = -1;
@@ -576,6 +587,7 @@ static PyObject *
 _io_FileIO_readable_impl(fileio *self)
 /*[clinic end generated code: output=640744a6150fe9ba input=a3fdfed6eea721c5]*/
 {
+  printf("FileIO_readable\n");
     if (self->fd < 0)
         return err_closed();
     return PyBool_FromLong((long) self->readable);
@@ -634,6 +646,7 @@ static PyObject *
 _io_FileIO_readinto_impl(fileio *self, Py_buffer *buffer)
 /*[clinic end generated code: output=b01a5a22c8415cb4 input=4721d7b68b154eaf]*/
 {
+  printf("FileIO_readinto\n");
     Py_ssize_t n;
     int err;
 
@@ -689,6 +702,7 @@ static PyObject *
 _io_FileIO_readall_impl(fileio *self)
 /*[clinic end generated code: output=faa0292b213b4022 input=dbdc137f55602834]*/
 {
+  printf("FileIO_readall\n");
     struct _Py_stat_struct status;
     Py_off_t pos, end;
     PyObject *result;
@@ -791,6 +805,7 @@ static PyObject *
 _io_FileIO_read_impl(fileio *self, Py_ssize_t size)
 /*[clinic end generated code: output=42528d39dd0ca641 input=bec9a2c704ddcbc9]*/
 {
+  printf("FileIO_read\n");
     char *ptr;
     Py_ssize_t n;
     PyObject *bytes;

@@ -1166,6 +1166,7 @@ Py_InitializeFromConfig(const PyConfig *config)
             return status;
         }
     }
+    printf("%d\n", 1174);
 
     return _PyStatus_OK();
 }
@@ -2268,11 +2269,13 @@ init_sys_streams(PyThreadState *tstate)
     struct _Py_stat_struct sb;
     if (_Py_fstat_noraise(fileno(stdin), &sb) == 0 &&
         S_ISDIR(sb.st_mode)) {
+      	printf("2288\n");
         return _PyStatus_ERR("<stdin> is a directory, cannot continue");
     }
 #endif
 
     if (!(iomod = PyImport_ImportModule("io"))) {
+      	printf("2293\n");
         goto error;
     }
 
@@ -2285,6 +2288,10 @@ init_sys_streams(PyThreadState *tstate)
     std = create_stdio(config, iomod, fd, 0, "<stdin>",
                        config->stdio_encoding,
                        config->stdio_errors);
+    if (std == NULL) {
+      	printf("2305\n");
+        goto error;
+    }
     if (std == NULL)
         goto error;
     PySys_SetObject("__stdin__", std);
@@ -2296,20 +2303,24 @@ init_sys_streams(PyThreadState *tstate)
     std = create_stdio(config, iomod, fd, 1, "<stdout>",
                        config->stdio_encoding,
                        config->stdio_errors);
-    if (std == NULL)
+    if (std == NULL) {
+      	printf("2317\n");
         goto error;
+    }
     PySys_SetObject("__stdout__", std);
     _PySys_SetObjectId(&PyId_stdout, std);
     Py_DECREF(std);
 
-#if 1 /* Disable this if you have trouble debugging bootstrap stuff */
+#if 0 /* Disable this if you have trouble debugging bootstrap stuff */
     /* Set sys.stderr, replaces the preliminary stderr */
     fd = fileno(stderr);
     std = create_stdio(config, iomod, fd, 1, "<stderr>",
                        config->stdio_encoding,
                        L"backslashreplace");
-    if (std == NULL)
+    if (std == NULL) {
+      	printf("2328\n");
         goto error;
+    }
 
     /* Same as hack above, pre-import stderr's codec to avoid recursion
        when import.c tries to write to stderr in verbose mode. */

@@ -385,6 +385,7 @@ _io_open_impl(PyObject *module, PyObject *file, const char *mode,
                                     path_or_fd, rawmode,
                                     closefd ? Py_True : Py_False,
                                     opener);
+	printf ("open:raw %p\n", raw);
     }
 
     if (raw == NULL)

@@ -1458,6 +1458,8 @@ resolve_name(PyThreadState *tstate, PyObject *name, PyObject *globals, int level
 static PyObject *
 import_find_and_load(PyThreadState *tstate, PyObject *abs_name)
 {
+    fprintf(stderr, "import find and load:%s\n",
+	    PyUnicode_AsUTF8(abs_name));
     _Py_IDENTIFIER(_find_and_load);
     PyObject *mod = NULL;
     PyInterpreterState *interp = tstate->interp;
@@ -1502,6 +1504,7 @@ import_find_and_load(PyThreadState *tstate, PyObject *abs_name)
     mod = _PyObject_CallMethodIdObjArgs(interp->importlib,
                                         &PyId__find_and_load, abs_name,
                                         interp->import_func, NULL);
+    printf ("import.c 1509 %s %p\n", PyUnicode_AsUTF8(abs_name), mod);
 
     if (PyDTrace_IMPORT_FIND_LOAD_DONE_ENABLED())
         PyDTrace_IMPORT_FIND_LOAD_DONE(PyUnicode_AsUTF8(abs_name),

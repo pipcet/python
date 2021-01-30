@@ -1058,9 +1058,9 @@ _PyEval_EvalFrameDefault(PyThreadState *tstate, PyFrameObject *f, int throwflag)
    -fno-crossjumping).
 */
 
-#ifdef DYNAMIC_EXECUTION_PROFILE
 #undef USE_COMPUTED_GOTOS
 #define USE_COMPUTED_GOTOS 0
+#ifdef DYNAMIC_EXECUTION_PROFILE
 #endif
 
 #ifdef HAVE_COMPUTED_GOTOS
@@ -4089,8 +4089,32 @@ exception_unwind:
             }
         } /* unwind stack */
 
-        /* End the loop as we still have an error */
-        break;
+	{
+	    static int count = 1000;
+	    if (count-- > 0)
+		break;
+	    printf("ceval.c 4097\n");
+	    PyErr_Print();
+	    PyObject *exc, *val, *tb;
+	    _PyErr_Fetch(tstate, &exc, &val, &tb);
+	    PyErr_Restore(exc, val, tb);
+	    /* Make the raw exception data
+	       available to the handler,
+	       so a program can emulate the
+	       Python main loop. */
+	    _PyErr_NormalizeException(tstate, &exc, &val, &tb);
+	    if (tb != NULL)
+		PyException_SetTraceback(val, tb);
+	    else
+		PyException_SetTraceback(val, Py_None);
+	    Py_INCREF(exc);
+	    PyObject_Print(exc, stdout, 0);
+	    PyObject_Print(val, stdout, 0);
+	    PyObject_Print(tb, stdout, 0);
+	    PyTraceBack_Print(tb, NULL);
+	    /* End the loop as we still have an error */
+	    break;
+	}
     } /* main loop */
 
     assert(retval == NULL);

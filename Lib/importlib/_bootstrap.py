@@ -167,11 +167,10 @@ class _ModuleLockManager:
         self._lock = None
 
     def __enter__(self):
-        self._lock = _get_module_lock(self._name)
-        self._lock.acquire()
+        pass
 
     def __exit__(self, *args, **kwargs):
-        self._lock.release()
+        pass
 
 
 # The following two functions are for consumption by Python/import.c.
@@ -243,10 +242,9 @@ def _call_with_frames_removed(f, *args, **kwds):
 
 def _verbose_message(message, *args, verbosity=1):
     """Print the message to stderr if -v/PYTHONVERBOSE is turned on."""
-    if sys.flags.verbose >= verbosity:
-        if not message.startswith(('#', 'import ')):
-            message = '# ' + message
-        print(message.format(*args), file=sys.stderr)
+    if not message.startswith(('#', 'import ')):
+        message = '# ' + message
+    print(message.format(*args), file=sys.stderr)
 
 
 def _requires_builtin(fxn):

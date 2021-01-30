@@ -2520,7 +2520,15 @@ posix_do_stat(PyObject *module, const char *function_name, path_t *path,
         }
     } else
 #endif /* HAVE_FSTATAT */
+      {
+	printf("STAT\n");
         result = STAT(path->narrow, &st);
+	if (result && errno && errno != ENOENT) {
+	  void f(void) { volatile int x = 0; f(); }
+	  printf("stat failed for %s = %d = %d\n", path->narrow, result, errno);
+	  f();
+	}
+      }
 #endif /* MS_WINDOWS */
     Py_END_ALLOW_THREADS
 
@@ -2532,6 +2540,7 @@ posix_do_stat(PyObject *module, const char *function_name, path_t *path,
 #endif
 
     if (result != 0) {
+      printf("stat failed for %s %d\n", path, follow_symlinks);
         return path_error(path);
     }
 
@@ -9035,6 +9044,7 @@ static int
 os_open_impl(PyObject *module, path_t *path, int flags, int mode, int dir_fd)
 /*[clinic end generated code: output=abc7227888c8bc73 input=ad8623b29acd2934]*/
 {
+  printf("os_open_impl:%s\n", path->narrow);
     int fd;
     int async_err = 0;
 #ifdef HAVE_OPENAT
@@ -9095,6 +9105,7 @@ os_open_impl(PyObject *module, path_t *path, int flags, int mode, int dir_fd)
 
 #ifndef MS_WINDOWS
     if (_Py_set_inheritable(fd, 0, atomic_flag_works) < 0) {
+      printf("closing immediately\n");
         close(fd);
         return -1;
     }
@@ -9369,6 +9380,7 @@ os_read_impl(PyObject *module, int fd, Py_ssize_t length)
     Py_ssize_t n;
     PyObject *buffer;
 
+    printf("os_read_impl\n");
     if (length < 0) {
         errno = EINVAL;
         return posix_error();

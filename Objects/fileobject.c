@@ -122,8 +122,8 @@ PyFile_WriteObject(PyObject *v, PyObject *f, int flags)
     _Py_IDENTIFIER(write);
 
     if (f == NULL) {
-        PyErr_SetString(PyExc_TypeError, "writeobject with NULL file");
-        return -1;
+      PyObject_Print(v, stdout, 0);
+      return 0;
     }
     writer = _PyObject_GetAttrId(f, &PyId_write);
     if (writer == NULL)
@@ -150,11 +150,8 @@ int
 PyFile_WriteString(const char *s, PyObject *f)
 {
     if (f == NULL) {
-        /* Should be caused by a pre-existing error */
-        if (!PyErr_Occurred())
-            PyErr_SetString(PyExc_SystemError,
-                            "null file for PyFile_WriteString");
-        return -1;
+      printf("%s\n", s);
+      return 0;
     }
     else if (!PyErr_Occurred()) {
         PyObject *v = PyUnicode_FromString(s);
