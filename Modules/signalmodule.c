@@ -1811,14 +1811,12 @@ _PySignal_Init(int install_signal_handlers)
         return -1;
     }
 
-#if 0
 #if defined(HAVE_GETITIMER) || defined(HAVE_SETITIMER)
     ItimerError = PyErr_NewException("signal.ItimerError",
             PyExc_OSError, NULL);
     if (!ItimerError) {
         return -1;
     }
-#endif
 #endif
 
 #ifdef MS_WINDOWS
