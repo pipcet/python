@@ -1471,11 +1471,13 @@ class FileFinder:
         # Check if the module is the name of a directory (and thus a package).
         base_path = _path_join(self.path, tail_module)
         for suffix, loader_class in self._loaders:
-            if suffix == '.py':
-                init_filename = '__init__' + suffix
-                full_path = _path_join(base_path, init_filename)
-                if _path_isfile(full_path):
-                    return self._get_spec(loader_class, fullname, full_path, [base_path], target)
+            init_filename = '__init__' + suffix
+            full_path = _path_join(base_path, init_filename)
+            if _path_isfile(full_path):
+                return self._get_spec(loader_class, fullname, full_path, [base_path], target)
+        # If a namespace package, return the path if we don't
+        #  find a module in the next section.
+        is_namespace = _path_isdir(base_path)
         # Check for a file w/ a proper suffix exists.
         for suffix, loader_class in self._loaders:
             full_path = _path_join(self.path, tail_module + suffix)
@@ -1493,7 +1495,12 @@ class FileFinder:
     def _fill_cache(self):
         """Fill the cache of potential modules and packages for this directory."""
         path = self.path
-        contents = ["encodings", "io", "zipimport.py"]
+        try:
+            contents = _os.listdir(path or _os.getcwd())
+        except (FileNotFoundError, PermissionError, NotADirectoryError):
+            # Directory has either been removed, turned into a file, or made
+            # unreadable.
+            contents = []
         # We store two cached versions, to handle runtime changes of the
         # PYTHONCASEOK environment variable.
         if not sys.platform.startswith('win'):
@@ -1528,6 +1535,8 @@ class FileFinder:
         """
         def path_hook_for_FileFinder(path):
             """Path hook for importlib.machinery.FileFinder."""
+            if not _path_isdir(path):
+                raise ImportError('only directories are supported', path=path)
             return cls(path, *loader_details)
 
         return path_hook_for_FileFinder
