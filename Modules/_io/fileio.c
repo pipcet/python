@@ -429,9 +429,11 @@ _Py_COMP_DIAG_POP
             goto error;
         }
 
+#if 0
 #ifndef MS_WINDOWS
         if (_Py_set_inheritable(self->fd, 0, atomic_flag_works) < 0)
             goto error;
+#endif
 #endif
     }
 
