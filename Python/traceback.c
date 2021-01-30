@@ -517,8 +517,6 @@ tb_displayline(PyObject *f, PyObject *filename, int lineno, PyObject *name)
     if (err != 0)
         return err;
     /* ignore errors since we can't report them, can we? */
-    if (_Py_DisplaySourceLine(f, filename, lineno, 4))
-        PyErr_Clear();
     return err;
 }
 
@@ -578,8 +576,10 @@ tb_printinternal(PyTracebackObject *tb, PyObject *f, long limit)
             err = tb_displayline(f, code->co_filename, tb->tb_lineno,
                                  code->co_name);
             if (err == 0) {
-                err = PyErr_CheckSignals();
-            }
+	      //err = PyErr_CheckSignals();
+            } else {
+	      printf("err %d\n", err);
+	    }
         }
         Py_DECREF(code);
         tb = tb->tb_next;
