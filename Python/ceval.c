@@ -1058,9 +1058,9 @@ _PyEval_EvalFrameDefault(PyThreadState *tstate, PyFrameObject *f, int throwflag)
    -fno-crossjumping).
 */
 
-#ifdef DYNAMIC_EXECUTION_PROFILE
 #undef USE_COMPUTED_GOTOS
 #define USE_COMPUTED_GOTOS 0
+#ifdef DYNAMIC_EXECUTION_PROFILE
 #endif
 
 #ifdef HAVE_COMPUTED_GOTOS
