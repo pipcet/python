@@ -2,9 +2,6 @@
 
 #include "Python.h"
 
-#include "Python-ast.h"
-#undef Yield   /* undefine macro conflicting with <winbase.h> */
-
 #include "pycore_ceval.h"         // _PyEval_FiniGIL()
 #include "pycore_context.h"       // _PyContext_Init()
 #include "pycore_fileutils.h"     // _Py_ResetForceASCII()
@@ -577,7 +574,7 @@ init_interp_create_gil(PyThreadState *tstate)
     _PyEval_FiniGIL(tstate->interp);
 
     /* Auto-thread-state API */
-    status = _PyGILState_Init(tstate);
+    status = _PyGILState_SetTstate(tstate);
     if (_PyStatus_EXCEPTION(status)) {
         return status;
     }
@@ -597,12 +594,19 @@ pycore_create_interpreter(_PyRuntimeState *runtime,
                           const PyConfig *config,
                           PyThreadState **tstate_p)
 {
+    /* Auto-thread-state API */
+    PyStatus status = _PyGILState_Init(runtime);
+    if (_PyStatus_EXCEPTION(status)) {
+        return status;
+    }
+
     PyInterpreterState *interp = PyInterpreterState_New();
     if (interp == NULL) {
         return _PyStatus_ERR("can't make main interpreter");
     }
+    assert(_Py_IsMainInterpreter(interp));
 
-    PyStatus status = _PyConfig_Copy(&interp->config, config);
+    status = _PyConfig_Copy(&interp->config, config);
     if (_PyStatus_EXCEPTION(status)) {
         return status;
     }
@@ -2884,7 +2888,10 @@ PyOS_setsig(int sig, PyOS_sighandler_t handler)
     struct sigaction context, ocontext;
     context.sa_handler = handler;
     sigemptyset(&context.sa_mask);
-    context.sa_flags = 0;
+    /* Using SA_ONSTACK is friendlier to other C/C++/Golang-VM code that
+     * extension module or embedding code may use where tiny thread stacks
+     * are used.  https://bugs.python.org/issue43390 */
+    context.sa_flags = SA_ONSTACK;
     if (sigaction(sig, &context, &ocontext) == -1)
         return SIG_ERR;
     return ocontext.sa_handler;

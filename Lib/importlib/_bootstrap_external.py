@@ -313,6 +313,7 @@ _code_type = type(_write_atomic.__code__)
 #     Python 3.10a1 3431 (New line number table format -- PEP 626)
 #     Python 3.10a2 3432 (Function annotation for MAKE_FUNCTION is changed from dict to tuple bpo-42202)
 #     Python 3.10a2 3433 (RERAISE restores f_lasti if oparg != 0)
+#     Python 3.10a6 3434 (PEP 634: Structural Pattern Matching)
 
 #
 # MAGIC must change whenever the bytecode emitted by the compiler may no
@@ -322,7 +323,7 @@ _code_type = type(_write_atomic.__code__)
 # Whenever MAGIC_NUMBER is changed, the ranges in the magic_values array
 # in PC/launcher.c must also be updated.
 
-MAGIC_NUMBER = (3433).to_bytes(2, 'little') + b'\r\n'
+MAGIC_NUMBER = (3434).to_bytes(2, 'little') + b'\r\n'
 _RAW_MAGIC_NUMBER = int.from_bytes(MAGIC_NUMBER, 'little')  # For import.c
 
 _PYCACHE = '__pycache__'
@@ -1229,6 +1230,8 @@ class _NamespaceLoader:
         The method is deprecated.  The import machinery does the job itself.
 
         """
+        _warnings.warn("_NamespaceLoader.module_repr() is deprecated and "
+                       "slated for removal in Python 3.12", DeprecationWarning)
         return '<module {!r} (namespace)>'.format(module.__name__)
 
     def is_package(self, fullname):
@@ -1257,6 +1260,10 @@ class _NamespaceLoader:
                                     self._path)
         # Warning implemented in _load_module_shim().
         return _bootstrap._load_module_shim(self, fullname)
+
+    def get_resource_reader(self, module):
+        from importlib.readers import NamespaceReader
+        return NamespaceReader(self._path)
 
 
 # Finders #####################################################################

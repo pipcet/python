@@ -626,6 +626,7 @@ ac_subst_vars='LTLIBOBJS
 TEST_MODULES
 LIBRARY_DEPS
 STATIC_LIBPYTHON
+OPENSSL_RPATH
 OPENSSL_LDFLAGS
 OPENSSL_LIBS
 OPENSSL_INCLUDES
@@ -855,6 +856,7 @@ with_readline
 with_computed_gotos
 with_ensurepip
 with_openssl
+with_openssl_rpath
 with_ssl_default_suites
 with_builtin_hashlib_hashes
 with_experimental_isolated_subinterpreters
@@ -1592,7 +1594,12 @@ Optional Packages:
   --with-ensurepip[=install|upgrade|no]
                           "install" or "upgrade" using bundled pip (default is
                           upgrade)
-  --with-openssl=DIR      override root of the OpenSSL directory to DIR
+  --with-openssl=DIR      root of the OpenSSL directory
+  --with-openssl-rpath=[DIR|auto|no]
+                          Set runtime library directory (rpath) for OpenSSL
+                          libraries, no (default): don't set rpath, auto:
+                          auto-detect rpath from --with-openssl and
+                          pkg-config, DIR: set an explicit rpath
   --with-ssl-default-suites=[python|openssl|STRING]
                           override default cipher suites string, python: use
                           Python's preferred selection (default), openssl:
@@ -2758,7 +2765,7 @@ if test "$srcdir" != . -a "$srcdir" != "$(pwd)"; then
     # If we're building out-of-tree, we need to make sure the following
     # resources get picked up before their $srcdir counterparts.
     #   Objects/ -> typeslots.inc
-    #   Include/ -> Python-ast.h
+    #   Include/ -> Python.h
     #   Python/  -> importlib.h
     # (A side effect of this is that these resources will automatically be
     #  regenerated when building out-of-tree, regardless of whether or not
@@ -10720,8 +10727,13 @@ then
   then
     as_fn_error $? "use both --with-tcltk-includes='...' and --with-tcltk-libs='...' or neither" "$LINENO" 5
   fi
-  TCLTK_INCLUDES=""
-  TCLTK_LIBS=""
+  if test -n "$PKG_CONFIG" && "$PKG_CONFIG" --exists tcl tk; then
+    TCLTK_INCLUDES="`"$PKG_CONFIG" tcl tk --cflags-only-I 2>/dev/null`"
+    TCLTK_LIBS="`"$PKG_CONFIG" tcl tk --libs 2>/dev/null`"
+  else
+    TCLTK_INCLUDES=""
+    TCLTK_LIBS=""
+  fi
 else
   TCLTK_INCLUDES="$with_tcltk_includes"
   TCLTK_LIBS="$with_tcltk_libs"
@@ -14565,10 +14577,10 @@ _ACEOF
 if ac_fn_c_try_compile "$LINENO"; then :
 
 
-if $GREP noonsees conftest.$ac_objext >/dev/null ; then
+if grep noonsees conftest.$ac_objext >/dev/null ; then
   ax_cv_c_float_words_bigendian=yes
 fi
-if $GREP seesnoon conftest.$ac_objext >/dev/null ; then
+if grep seesnoon conftest.$ac_objext >/dev/null ; then
   if test "$ax_cv_c_float_words_bigendian" = unknown; then
     ax_cv_c_float_words_bigendian=no
   else
@@ -17644,6 +17656,36 @@ $as_echo "#define HAVE_X509_VERIFY_PARAM_SET1_HOST 1" >>confdefs.h
     LIBS="$save_LIBS"
 fi
 
+# rpath to libssl and libcrypto
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for --with-openssl-rpath" >&5
+$as_echo_n "checking for --with-openssl-rpath... " >&6; }
+
+# Check whether --with-openssl-rpath was given.
+if test "${with_openssl_rpath+set}" = set; then :
+  withval=$with_openssl_rpath;
+else
+  with_openssl_rpath=no
+
+fi
+
+case $with_openssl_rpath in #(
+  auto|yes) :
+    OPENSSL_RPATH=auto ;; #(
+  no) :
+    OPENSSL_RPATH= ;; #(
+  *) :
+    if test -d "$with_openssl_rpath"; then :
+  OPENSSL_RPATH="$with_openssl_rpath"
+else
+  as_fn_error $? "--with-openssl-rpath \"$with_openssl_rpath\" is not a directory" "$LINENO" 5
+fi
+
+ ;;
+esac
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $OPENSSL_RPATH" >&5
+$as_echo "$OPENSSL_RPATH" >&6; }
+
+
 # ssl module default cipher suite string
 
 
@@ -17770,7 +17812,7 @@ $as_echo "yes" >&6; }
 fi
 
 LIBRARY_DEPS='$(PY3LIBRARY) $(EXPORTSYMS)'
-if test "$PY_ENABLE_SHARED" = 1; then
+if test "$PY_ENABLE_SHARED" = 1 || test "$enable_framework" ; then
     LIBRARY_DEPS="\$(LDLIBRARY) $LIBRARY_DEPS"
     if test "$STATIC_LIBPYTHON" = 1; then
         LIBRARY_DEPS="\$(LIBRARY) $LIBRARY_DEPS"
